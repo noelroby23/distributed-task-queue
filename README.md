@@ -12,10 +12,6 @@ It is intentionally smaller than Celery, but it still demonstrates the core idea
 - priority queues and scheduled jobs
 - lightweight monitoring, metrics, and worker heartbeats
 
-Resume-ready description:
-
-> Built a Dockerized distributed task queue in Python using FastAPI and Redis with multi-worker execution, retries with backoff, timeouts, dead-letter queues, priority scheduling, and operational metrics.
-
 ## What This Project Demonstrates
 
 - distributed systems fundamentals with a shared broker and worker pool
@@ -324,39 +320,3 @@ python3 -m pytest
 docker compose logs -f worker1 worker2 worker3
 ```
 
-## Design Decisions
-
-- Why Redis hashes?
-  - one canonical task record per job
-  - simple polling and metadata inspection
-- Why Redis lists?
-  - minimal runnable queue implementation
-  - easy to explain and debug
-- Why a sorted set for scheduling?
-  - natural fit for future eligibility timestamps
-- Why subprocess timeouts?
-  - practical hard timeout enforcement for synchronous Python work
-- Why JSON metrics instead of external tooling?
-  - keeps observability lightweight and self-contained
-
-## Tradeoffs And Limitations
-
-Be honest about these in interviews:
-
-- this is a simplified queue, not a full broker with acknowledgements or consumer groups
-- once a worker pops a task from a runnable list, a hard crash during execution can still lose in-flight work
-- strict priority can starve low-priority work under constant high-priority load
-- scheduled execution is near-real-time, not millisecond-precise, because workers poll periodically
-- `image_resize` uses local file paths only and expects shared disk access under Docker Compose
-- metrics are operational counters, not a full time-series monitoring system
-
-## Interview-Friendly Summary
-
-This project is a compact distributed systems exercise that demonstrates how to build a queueing system from first principles with Redis and FastAPI. It shows task submission, worker coordination, retries, scheduling, fault handling, and observability without depending on a large framework.
-
-## Resume Bullet Ideas
-
-- Built a distributed task queue in Python with FastAPI and Redis, supporting asynchronous task submission, multi-worker execution, and status polling.
-- Implemented retries with exponential backoff, per-task timeouts, and dead-letter queue handling to improve fault tolerance.
-- Added high/medium/low priority queues and scheduled-job promotion using Redis lists and sorted sets.
-- Designed lightweight observability with Redis-backed metrics, worker heartbeats, and a FastAPI monitoring dashboard.
