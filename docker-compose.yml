@@ -1,0 +1,96 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      QUEUE_NAME: task_queue
+      DEAD_LETTER_QUEUE_NAME: task_queue_dead_letter
+      SCHEDULED_QUEUE_NAME: task_queue:scheduled
+      MAX_RETRIES: 3
+      DEFAULT_TASK_TIMEOUT: 30
+      WORKER_POLL_TIMEOUT: 1
+      WORKER_HEARTBEAT_TTL: 30
+      PYTHONUNBUFFERED: 1
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+
+  worker1:
+    build: .
+    command: python -m app.worker --id worker-1
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      QUEUE_NAME: task_queue
+      DEAD_LETTER_QUEUE_NAME: task_queue_dead_letter
+      SCHEDULED_QUEUE_NAME: task_queue:scheduled
+      MAX_RETRIES: 3
+      DEFAULT_TASK_TIMEOUT: 30
+      WORKER_POLL_TIMEOUT: 1
+      WORKER_HEARTBEAT_TTL: 30
+      PYTHONUNBUFFERED: 1
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+
+  worker2:
+    build: .
+    command: python -m app.worker --id worker-2
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      QUEUE_NAME: task_queue
+      DEAD_LETTER_QUEUE_NAME: task_queue_dead_letter
+      SCHEDULED_QUEUE_NAME: task_queue:scheduled
+      MAX_RETRIES: 3
+      DEFAULT_TASK_TIMEOUT: 30
+      WORKER_POLL_TIMEOUT: 1
+      WORKER_HEARTBEAT_TTL: 30
+      PYTHONUNBUFFERED: 1
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+
+  worker3:
+    build: .
+    command: python -m app.worker --id worker-3
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      QUEUE_NAME: task_queue
+      DEAD_LETTER_QUEUE_NAME: task_queue_dead_letter
+      SCHEDULED_QUEUE_NAME: task_queue:scheduled
+      MAX_RETRIES: 3
+      DEFAULT_TASK_TIMEOUT: 30
+      WORKER_POLL_TIMEOUT: 1
+      WORKER_HEARTBEAT_TTL: 30
+      PYTHONUNBUFFERED: 1
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
